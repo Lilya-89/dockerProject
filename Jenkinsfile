@@ -10,7 +10,7 @@ node{
     }
 
     stage('Test image') {
-        docker.image('ilyas/nginx').withRun('-p 80:80') { c ->
+        docker.image('ilyas/nginx').withRun('-p 3000:80') { c ->
         sh 'docker ps'
         sh 'curl http://localhost:8080'
 	     }
