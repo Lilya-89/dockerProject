@@ -1,18 +1,29 @@
 node{
-  def app
+  def registryProjet='registry.gitlab.com/lilya-89/jenkins-formation'
+  def IMAGE="${registryProjet}:version-${env.BUILD_ID}"
+
 
     stage('Clone') {
         checkout scm
     }
-
-    stage('Build image') {
-        app = docker.build("ilyas/nginx")
+	 def img = stage('Build') {
+          docker.build("$IMAGE",  '.')
     }
 
-    stage('Test image') {
-        docker.image('ilyas/nginx').withRun('-p 3030:3030') { c ->
-        sh 'docker ps'
-        sh 'curl http://localhost:8080'
-	     }
+
+      stage('Run') {
+          img.withRun("--name run-$BUILD_ID -p 3000:80") { c ->
+            sh 'docker ps'
+            sh 'curl localhost:8080'
+          }
     }
+
+
+   stage('Push') {
+          docker.withRegistry('https://registry.gitlab.com', 'gitLab') {
+              img.push 'latest'
+              img.push()
+          }
+    }
+
 }
